@@ -1,0 +1,32 @@
+#!/bin/bash
+
+for id in 01 02 03 05 07 09 10 17 18 19 20 21 22 23
+do
+  echo $id
+  python 1_data_segmentation.py $id
+  seizure_num=$(cat ../seizures_num.txt)
+  rm '../seizures_num.txt'
+
+  for idx in $(seq $seizure_num)
+  do
+      python 2_train_test_split.py $id $idx
+      python 3_preprocessing.py $id
+      python 4_standardization.py $id
+      rm -r ../images/ &&
+
+      python 5_CNN_training.py $id 12345
+      python 6_LSTM_training.py $id 12345
+      python 7_test_interval.py $id
+
+      rm -r ../selected_segments/
+      rm -r ../standardized_images/
+      rm -r ../cnn_models/
+      rm -r ../lstm_models/
+      rm -r ~/.local/share/Trash/files/*
+  done
+
+    python 8_metrics.py $id &&
+    rm -r ../segments/
+    rm -r ~/.local/share/Trash/files/*
+
+done
